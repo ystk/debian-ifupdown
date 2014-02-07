@@ -1,3 +1,392 @@
+ifupdown (0.7.8) unstable; urgency=medium
+
+  * Assign logical interface name for link pseudointerface on down
+    (Closes: #705268).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 12 Apr 2013 11:44:21 +0200
+
+ifupdown (0.7.7) unstable; urgency=low
+
+  * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
+  * Don't call dhclient with -1 for now.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 25 Mar 2013 22:12:09 +0100
+
+ifupdown (0.7.6) unstable; urgency=low
+
+  [ Andrew Shadura ]
+  * Don't configure bridge interfaces as tagged VLAN interfaces
+    (Closes: #696642).
+  * Implement inet6/auto for kFreeBSD, call DHCP release of ifdown
+    on Linux (Closes: #701884).
+  * Update manual pages.
+
+  [ Stéphane Graber ]
+  * Set MTU of tunnel devices (LP: #1074048).
+  * Actually set the new calculated value for duplicate entries
+    (LP: #1086517).
+
+  [ Josselin Mouette ]
+  * postinst: Do not create /etc/network/interfaces if it was removed manually
+    (Closes: #695906)
+
+ -- Andrew Shadura <bugzilla@tut.by>  Sun, 03 Mar 2013 12:08:16 +0100
+
+ifupdown (0.7.5) unstable; urgency=low
+
+  * Fix upstart hooks (Closes: #692110).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Fri, 02 Nov 2012 18:30:19 +0100
+
+ifupdown (0.7.4) unstable; urgency=low
+
+  * Check if upstart is the current init and don't try to call initctl if it
+    isn't (Closes: #692008).
+  * Bump lsb-base dependency to be able to use init_is_upstart.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 01 Nov 2012 12:01:17 +0100
+
+ifupdown (0.7.3) unstable; urgency=low
+
+  * Fix the calculation of broadcast addresses of obsolete scheme;
+    previously, a network mask was mistakenly used instead of them.
+  * Follow RFC 3021 regarding broadcast addresses in /31 subnets:
+    they should use limited broadcast address (Closes: #690561).
+  * Add upstart support (patch provided by Steve Langasek, closes: #679549).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Tue, 16 Oct 2012 10:39:24 +0200
+
+ifupdown (0.7.2) unstable; urgency=low
+
+  * Don't install /etc/default/networking as executable (Closes: #679623).
+  * Declare Breaks on dhcp-client (<< 3.0) instead of Conflicts.
+  * Implement --no-scripts option (LP: #258782).
+  * Calculate the length of a string properly (Closes: #681431).
+  * When bringing hotplug interfaces up, strip VLAN and alias identifiers out
+    (Closes: #680042).
+  * LSB headers: depend on urandom.
+  * Recognize vlan+alias combination and filter aliases out (Closes: #679672).
+  * Work-around ip(8) understanding of 0NNN as octal numbers (Closes: #684698).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 16 Aug 2012 23:22:32 +0200
+
+ifupdown (0.7.1) unstable; urgency=low
+
+  * Supply metric setting to dhclient (Closes: #279741, #364581, #676323).
+  * Add autoconf/accept_ra options to inet6/dhcp (Closes: #676244).
+  * Clean up after /run migration (Closes: #673057):
+    - Remove old /etc/network/run.dpkg-old symlink.
+    - Try to remove old /etc/network/run even if it's a symlink.
+  * Depend on initscripts >= 2.88dsf-25 so mountnfs doesn't break.
+  * Pass -q to sysctl to make the output less verbose.
+  * Fix shell scripting mistake in /etc/init.d/networking (thanks to
+    Stanislav Maslovski, closes: #678101).
+  * Changes to interfaces exclusion:
+    - Accept -X shortcut (wasn't working because of a bug).
+    - Allow specifying more than one -X option.
+    - Use shell glob syntax.
+  * Add /etc/default/networking (Closes: #580035, #677973):
+    - CONFIGURE_INTERFACES can be used to disable interfaces configuration.
+    - Individual interfaces can be excluded with EXCLUDE_INTERFACES.
+    - Extra verbosity may be requested with VERBOSE.
+  * When ifup is being run with --force -n, always report errors regardless of
+    ifstate.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 21 Jun 2012 18:59:10 +0200
+
+ifupdown (0.7) unstable; urgency=low
+
+  * Accept duplicate options in /etc/network/interfaces, join them using
+    a newline as a delimiter.
+  * If an interface isn't defined, but mentioned in auto or allow statement,
+    don't mention it in ifquery output.
+  * Change shortcut for --exclude to -X (was -e previously).
+  * Make ifquery return false if the interface isn't defined.
+  * Fix typos in the changelog.
+  * Calculate broadcast address internally.
+  * Allow concurrent netmask specification in both address (using CIDR
+    notation) and netmask for IPv6 (Closes: #674775).
+  * Add preferred-lifetime setting for IPv6.
+  * Pass -w and -e options to sysctl so we still can configure an interface
+    even if IPv6 SLAAC options can't be set for some reason.
+  * Port to GNU/Hurd (thanks to Svante Signell, closes: #296115).
+  * Chdir to root when executing external programs (Closes: #361964).
+  * Remove updetach from PPP method (Closes: #675016).
+  * Configure hotplug interfaces only if they're running (thanks to Evgeni
+    Golov, closes: #673658).
+  * Rewrite NEWS file (Closes: #673688).
+  * Update examples (Closes: #340992).
+  * Update tests.
+  * Update README.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Wed, 30 May 2012 17:45:46 +0200
+
+ifupdown (0.7~rc3) unstable; urgency=low
+
+  * Upload to unstable.
+  * Don't refer to README from netbase any more.
+  * Internal changes:
+    - Make set_variable() able to set variables conditionally.
+    - Improve conversions interface.
+    - Add some support for interface link configuration.
+    - Don't leak memory in some functions.
+  * Configure VLANs automatically (Closes: #520436).
+  * Calculate netmask internally, so even if a user haven't supplied
+    one or have used CIDR notation, hook scripts will have it properly
+    specified in IF_NETMASK environment variable.
+  * Declare Breaks/Replaces relationship against netbase << 5.0.
+  * Merge changes from Ubuntu (thanks to Stéphane Graber):
+    - Mark package as Multi-Arch: foreign.
+    - Update statefile paths in the 'contrib' scripts and in the
+      noweb source.
+  * Temporarily unapply patch for #547587.
+  * Update tests.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 14 May 2012 11:42:08 +0200
+
+ifupdown (0.7~rc2+experimental) experimental; urgency=low
+
+  * Try to bring hotplug interfaces up on initscript restart
+    action as well.
+  * Don't call ifup when there are no interfaces to bring up
+    (Closes: #670145).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 23 Apr 2012 14:36:28 +0200
+
+ifupdown (0.7~rc1+experimental) experimental; urgency=low
+
+  * Prefer isc-dhcp-client to dhcp3-client (also closes: #422885).
+  * Let dhclient fail when no lease can be acquired (Closes: #420784).
+  * Raise command-line options priority over /etc/network/interfaces
+    (Closes: #657743).
+  * Prevent aliases and VLANs from putting the main interface down
+    (Closes: #656270).
+  * Make iproute2 calculate the broadcast address (LP: #924880).
+  * Shut udhcpc down correctly (Closes: #338348).
+  * Update the rules according to /run migration.
+  * Pass hardening flags from dpkg-buildflags (Closes: #661243).
+  * Implement ifquery interface (Closes: #568479).
+    - Make ifquery process mappings (LP: #850166).
+    - Ensure ifquery always has no_act turned on.
+  * Change --all behaviour:
+    - If ifup or ifquery is called with the --all option, if doesn't just
+      bring up all interfaces marked as "auto", but all interfaces of a
+      specified class, "auto" by default. For most uses, this doesn't
+      change anything, but lets all the interfaces of a specific class be
+      brought up or queried.
+  * Support cross-compilation, move Debian-specific things out of
+    the Makefile (Closes: #666084).
+  * Take networking init script over from netbase package.
+    - Add reload action which reconfigures all interfaces currently
+      configured.
+    - Add LSB Description field.
+    - Remove /usr from PATH.
+    - Merge ifupdown initscript in.
+    - Improve warning messages.
+    - Don't use redirection hacks when parsing /proc/mounts and /proc/swap.
+    - Document all supported subcommands.
+    - On start, try to configure hotplug interfaces if they seem to be ready.
+      Ignore errors if they fail to configure for some reason (for example,
+      if the interface happens to be renamed by udev before it's fully
+      configured).
+    - Override Lintian's false positives.
+  * Remove /etc/default/ifupdown.
+  * Call hook scripts when processing all interfaces:
+    - If ifupdown is called with the --all option, before or after doing
+      anything to the interfaces, it calls all the hook scripts (pre-up or
+      down) with IFACE set to "--all", LOGICAL set to the current class
+      specified by the --allow option (or "auto" if it's not set),
+      ADDRFAM="meta" and METHOD="none".
+  * Fix IPv6 issue on kFreeBSD.
+  * Update test suite.
+  * Improve manual pages.
+  * Bump Standards-Version to 3.9.3.
+  * Also closes: #535226:
+    - In 0.7~alpha5, "auto" method has been added.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Tue, 17 Apr 2012 01:05:42 +0200
+
+ifupdown (0.7~beta2) experimental; urgency=low
+
+  * Put interfaces down in the reverse order than they were
+    brought up (Closes: #477650).
+  * Fix postinst issues with loopback interface naming
+    (Closes: #572396, #545250).
+  * Remove old .dpkg-old symlink (Closes: #639612).
+  * Document some details on processing /etc/network/if-*.d directories.
+  * Terminate ifup if it's still running when doing ifdown.
+  * Finally migrate to /run/network.
+  * Use FHS names for wvdial pid files (Closes: #255222).
+  * Stop on run-parts failure (Closes: #547587).
+  * Execute scripts before interface options on *-down (Closes: #346459).
+  * Display missing variable name in the error message; make it also a bit
+    less obscure (Closes: #502630).
+  * Fix wvdial options description (Closes: #534181).
+  * Specify interface label (Closes: #645813).
+  * Add address scope option for static IPv4 and IPv6 setups.
+  * Use FreeBSD version of route, thanks to Robert Millan (Closes: #646291).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 13 Nov 2011 23:20:11 +0100
+
+ifupdown (0.7~beta1) experimental; urgency=low
+
+  * Update the examples (Closes: #630551).
+  * Remove Default-Stop from the LSB headers (Closes: #630506).
+  * Add IPv4LL method (Closes: #204641).
+  * Add initial DHCPv6 support.
+  * Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
+  * Support per-architecture build-time rule definitions.
+  * Add a syntax (%iface/a/b%) to perform character replacement over
+    variable values.
+  * Accept VLAN interface names (Closes: #632902).
+  * Update test cases.
+  * Correct the spelling of the maintainer's last name.
+  * Add partial kFreeBSD support (Closes: #630512).
+  * Drop 'ifupdown-clean' init script (not needed any more with /run).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Tue, 23 Aug 2011 11:49:19 +0300
+
+ifupdown (0.7~alpha5.1) experimental; urgency=low
+
+  * Non-maintainer upload.
+  * No source changes.
+  * Upload to experimental rather than unstable.
+
+ -- Roger Leigh <rleigh@debian.org>  Tue, 14 Jun 2011 18:44:11 +0100
+
+ifupdown (0.7~alpha5+really0.6.16) unstable; urgency=low
+
+  * Use FreeBSD version of route, thanks to Robert Millan
+    for the patch (Closes: #646291).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 23 Oct 2011 21:10:44 +0300
+
+ifupdown (0.7~alpha5+really0.6.15) unstable; urgency=low
+
+  * Replace /etc/network/run.dpkg-old correctly (Closes: #639612).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 29 Aug 2011 11:00:17 +0300
+
+ifupdown (0.7~alpha5+really0.6.14) unstable; urgency=low
+
+  * Create /etc/network/interfaces correctly (Closes: #638718).
+  * Correct the spelling of the maintainer's last name.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Mon, 22 Aug 2011 23:02:50 +0300
+
+ifupdown (0.7~alpha5+really0.6.13) unstable; urgency=low
+
+  * Clean up SysV symlinks on upgrade (Closes: #637804).
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 14 Aug 2011 21:36:02 +0300
+
+ifupdown (0.7~alpha5+really0.6.12) unstable; urgency=low
+
+  * Fix init script dependencies so we don't try to remove state
+    file before the root filesystem is remounted R/W (Closes: #637435).
+  * Don't install ifupdown.init on runlevels 0 and 6.
+  * Add Vcs-Hg field.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sat, 13 Aug 2011 20:05:15 +0300
+
+ifupdown (0.7~alpha5+really0.6.11) unstable; urgency=low
+
+  * Backport the fixes for the following bugs from 0.7 branch:
+    - Suggest isc-dhcp-client instead of dhcp3-client (Closes: #631414).
+    - Remove Default-Stop from the LSB headers (Closes: #630506).
+    - Fix init script dependencies (Closes: #607713).
+  * Report the correct version number on --version.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Sun, 07 Aug 2011 15:38:26 +0300
+
+ifupdown (0.7~alpha5+really0.6.10) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * No source changes.
+  * Bump version to replace 0.7~alpha5 which was uploaded to
+    unstable (rather than experimental) by mistake (Closes: #630501).
+
+ -- Roger Leigh <rleigh@debian.org>  Tue, 14 Jun 2011 17:48:20 +0100
+
+ifupdown (0.7~alpha5) experimental; urgency=low
+
+  * Set PHASE variable (Closes: #629821).
+  * Allow privacy extensions for inet6/auto (Closes: #629841).
+  * Make Router Advertisements and SLAAC configurable (Closes: #629837).
+  * Fix the IPv4 interface down sequence (Closes: #629836).
+  * Add Vcs-* fields.
+  * Remove privacy extensions option for 6in4/6to4 interfaces
+    as no SLAAC is possible there.
+  * Document interface exclusion option.
+  * Improve conversions code, allowing calculating 6to4 address without
+    calling external utilities.
+  * Fix some compilation warnings.
+  * Update test cases.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Thu, 09 Jun 2011 00:07:09 +0300
+
+ifupdown (0.7~alpha4) experimental; urgency=low
+
+  * New maintainer.
+  * Remove VCS repository from the tarball (Closes: #417718).
+  * Add source stanza (Closes: #159884, #149395, #471834).
+  * Fix bashism in example script get-mac-address.sh (Closes: #518924).
+  * Use DebSrc3.0 source format and dh7.
+  * Add auto method for IPv6, fix static method (Closes: #604136).
+  * Update URL for Debian Reference (Closes: #610238).
+  * Fix typos in the man page (Closes: #384143, #415285).
+  * Add GRE and IPIP tunnels support (Closes: #158089).
+  * Fix inet/static pointopoint option (Closes: #460276).
+  * Add support for enabling/disabling IPv6 privacy extension
+    (Closes: #520576).
+  * Move network state file to /run/network (Closes: #389996).
+  * Fix init script dependencies (Closes: #607713, #601705).
+  * Add MTU setting for v4tunnel (Closes: #408453, #575110).
+  * Allow multiple interface definitions to ease work with multiple IP per
+    interface.
+  * Allow passing PPP options, pass updetach by default (Closes: #196877).
+  * Add 6to4 tunnels support (Closes: #357929).
+  * Add CAN interface support (Closes: #584530).
+  * Drop 0.5.x migration script.
+  * Drop dependency on net-tools; suggest it instead.
+  * Bump Standards-Version to 3.9.2.
+
+ -- Andrew O. Shadura <bugzilla@tut.by>  Wed, 08 Jun 2011 12:10:14 +0300
+
+ifupdown (0.7~alpha3) experimental; urgency=low
+
+  * Apply patches from Andreas Henriksson (Closes: Bug#456918)
+    - Fix aadr typo in IPv6 loopback method
+    - Add dependency on new version of iproute that supports specifying
+      netmasks as dotted-quads.
+    - Re-add netmask field for backwards compatibility.
+    - Flush addresses when taking down a static inet interface.
+      (Closes: Bug#431059)
+    - Switch inet/dhcp and inet6/static methods to iproute.
+    - Update test cases.
+    - Support for conversion of ifconfig format hwaddress to iproute format
+      hwaddress.
+  * Update Build-Depends: to reflect name change from nowebm to noweb.
+  * Move DH_COMPAT setting from debian/rules to debian/compat file.
+  * Don't ignore errors from make clean in debian/rules clean target.
+  * Escape hypens in interfaces.5 manpage.
+  * Don't create /usr/bin or /usr/sbin directories.
+  * Bump Standards-Version.
+
+ -- Anthony Towns <ajt@debian.org>  Sat, 22 Dec 2007 00:31:16 +1000
+
+ifupdown (0.7~alpha2) experimental; urgency=low
+
+  * Add command line interface options (ifup -o foo=bar eth1). Yay!
+  * Switch to using iproute instead of ifconfig/route. Thanks to Andrew
+    Pollock.
+  * Drop support for kernels prior to 2.1.100 (and that don't have NETLINK
+    for iproute).
+  * Drop support for specifying a "netmask" in static inet interfaces.
+  * Bump DH_COMPAT to 4 (from 1!)
+
+ -- Anthony Towns <aj@azure.humbug.org.au>  Mon, 18 Jun 2007 15:47:21 +0100
+
 ifupdown (0.6.10) unstable; urgency=low
 
   * Try to load the ipv6 module when doing up on inet6 stansas except

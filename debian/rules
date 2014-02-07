@@ -34,38 +34,40 @@
 #
 ######################################################################
 
-# Uncomment this to turn on verbose mode.
-#export DH_VERBOSE=1
+export VERSION := $(shell dpkg-parsechangelog|grep Version|cut -d' ' -f2|sed s/.*really//g)
+export CFLAGS := -Wall -W $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS) -D'IFUPDOWN_VERSION="$(VERSION)"'
+export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
+ifeq "$(origin CC)" "default"
+export CC := $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)-gcc
+endif
+export ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH_OS)
+export DESTDIR := debian/$(shell dh_listpackages)
 
-# For working out whether we're cross-building
-DEB_BUILD_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-DEB_HOST_GNU_TYPE	:= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+%:
+	dh $@
 
-# user/group of to-be-installed files
-ROOT_USER  := 0
-ROOT_GROUP := 0
+override_dh_auto_configure:
+	chmod a+rx makecdep.sh makenwdep.sh
 
-PACKAGE=ifupdown
+override_dh_installinit:
+	dh_installinit --name=networking --no-start -- start 40 S . start 35 0 6 .
+	install -p -m 0644 debian/networking.defaults $(DESTDIR)/etc/default/networking
+	dh_installinit --name=network-interface-container --noscripts
+	dh_installinit --name=network-interface-security --noscripts
+	dh_installinit --name=network-interface --noscripts
+	dh_installinit --name=networking --noscripts
 
-configure:
-	dh_testdir
+override_dh_installifupdown:
+	dh_installifupdown --name=upstart
 
-build: build-stamp
-build-stamp: # configure
-	dh_testdir
-
-	if [ -x /usr/bin/noweb ]; then \
-	  $(MAKE) clobber; \
-	else \
-	  chmod a+rx defn2c.pl defn2man.pl makecdep.sh makenwdep.sh; \
-	fi
-	$(MAKE)
-	touch build-stamp
-
-test: build
-	dh_testdir
+override_dh_auto_clean:
+	$(MAKE) clean
+	$(MAKE) clobber
+	rm -rf tests/
 
 ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
+ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+override_dh_auto_test:
 	chmod a+rx debian/testbuild
 	@echo running debian/testbuild
 	@if ! debian/testbuild; then \
@@ -79,73 +81,13 @@ ifeq ($(DEB_BUILD_GNU_TYPE),$(DEB_HOST_GNU_TYPE))
 	     exit 1; \
 	fi
 endif
+endif
 
-clean:
-	dh_testdir
-	dh_testroot
-
-	# Add here commands to clean up after the build process
-	rm -rf tests/
-	rm -f build-stamp install-stamp
-	[ ! -f Makefile ] || $(MAKE) clean
-
-	dh_clean
-
-install-stamp: install
-install: build test
-	dh_testdir
-	dh_testroot
-	dh_prep
-	dh_installdirs etc/network/if-pre-up.d etc/network/if-up.d etc/network/if-down.d etc/network/if-post-down.d
-
-	# Add here commands to install the package into debian/tmp.
-	$(MAKE) install BASEDIR=`pwd`/debian/$(PACKAGE)
-
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 755 debian/upgrade-from-0.5.x.pl \
-		debian/$(PACKAGE)/usr/share/ifupdown/
-	touch install-stamp
-
-# Build architecture-independent files here.
-binary-indep: build-stamp install-stamp
-# We have nothing to do by default.
-
-# Build architecture-dependent files here.
-binary-arch: build install
-#	dh_testversion
-	dh_testdir
-	dh_testroot
-#	dh_installdebconf	
-	dh_installdocs
-	dh_installexamples contrib/*
-	mv debian/$(PACKAGE)/usr/share/doc/ifupdown/examples debian/$(PACKAGE)/usr/share/doc/ifupdown/contrib
-	dh_installexamples examples/*
-	dh_installmenu
-#	dh_installemacsen
-#	dh_installpam
-	dh_installinit --name=ifupdown-clean --no-start -- start 18 S .
-	dh_installinit --name=ifupdown --no-start -- start 39 S .  start 36 0 6 .
-	dh_installcron
-#	dh_installmanpages
-#	   ^-- can't do our symlink trick
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 interfaces.5 debian/$(PACKAGE)/usr/share/man/man5/interfaces.5
-	install -o $(ROOT_USER) -g $(ROOT_GROUP) -m 644 ifup.8 debian/$(PACKAGE)/usr/share/man/man8/ifup.8
-	ln -s ifup.8 debian/$(PACKAGE)/usr/share/man/man8/ifdown.8
-	dh_installinfo
-#	dh_undocumented
-	dh_installchangelogs ChangeLog
-	dh_link
-	dh_strip
-	dh_compress
-	dh_fixperms
-	# You may want to make some executables suid here.
-#	dh_suidregister
-#	dh_makeshlibs
-	dh_installdeb
-#	dh_perl
-	dh_shlibdeps
-	dh_gencontrol
-	dh_md5sums
-	dh_builddeb
-
-binary: binary-indep binary-arch
-.PHONY: build clean binary-indep binary-arch binary install configure test
+override_dh_gencontrol:
+ifeq ($(DEB_HOST_ARCH_OS),linux)
+	dh_gencontrol -- -V'net:Depends=iproute (>= 20071016-1)' -V'net:Suggests=net-tools'
+else ifeq ($(DEB_HOST_ARCH_OS),kfreebsd)
+	dh_gencontrol -- -V'net:Depends=net-tools' -V'net:Suggests='
+else ifeq ($(DEB_HOST_ARCH_OS),hurd)
+	dh_gencontrol -- -V'net:Depends=inetutils-tools' -V'net:Suggests='
+endif

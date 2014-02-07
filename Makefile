@@ -1,20 +1,24 @@
-CFLAGS := -Wall -W -g -O2 -D'IFUPDOWN_VERSION="0.6.5"'
-CC := gcc
+VERSION ?= 0.7
+CFLAGS ?= -Wall -W -g -O2 -D'IFUPDOWN_VERSION="$(VERSION)"'
+ARCH ?= linux
 
-CFILES := addrfam.c execute.c config.c main.c archlinux.c
-HFILES := header.h archlinux.h
+BASEDIR ?= $(DESTDIR)
+
+CFILES := addrfam.c execute.c config.c main.c arch$(ARCH).c
+HFILES := header.h arch$(ARCH).h
 PERLFILES := defn2c.pl defn2man.pl
-DEFNFILES := inet.defn ipx.defn inet6.defn
+DEFNFILES := inet.defn ipx.defn inet6.defn can.defn
 
 OBJ := main.o addrfam.o execute.o config.o \
-	$(patsubst %.defn,%.o,$(DEFNFILES)) archlinux.o
+	$(patsubst %.defn,%.o,$(DEFNFILES)) arch$(ARCH).o meta.o link.o
 
 MAN := $(patsubst %.defn,%.man,$(DEFNFILES))
+DEFNFILES += meta.defn link.defn
 
 default : executables
 all : executables docs
 
-executables : ifup ifdown ifup.8 ifdown.8 interfaces.5
+executables : ifup ifdown ifquery ifup.8 ifdown.8 ifquery.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
 .PHONY : executables 
@@ -24,16 +28,17 @@ install :
 	install -m 0755 -d     ${BASEDIR}/sbin
 	install -m 0755 ifup   ${BASEDIR}/sbin
 	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifdown	
+	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifquery
 
 clean :
 	rm -f *.aux *.toc *.log *.bbl *.blg *.ps *.eps *.pdf
 	rm -f *.o *.d $(patsubst %.defn,%.c,$(DEFNFILES)) *~
 	rm -f $(patsubst %.defn,%.man,$(DEFNFILES))
-	rm -f ifup ifdown interfaces.5 ifdown.8
+	rm -f ifup ifdown ifquery interfaces.5 ifdown.8 ifquery.8
 	rm -f ifupdown.dvi *.ps{,.gz}
 
 clobber : clean
-	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES)
+	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES) arch*
 
 distclean : clobber
 	rm -f makecdep.sh makenwdep.sh Makefile
@@ -42,11 +47,14 @@ ifup: $(OBJ)
 
 ifdown: ifup
 	ln -sf ifup ifdown
+
+ifquery: ifup
+	ln -sf ifup ifquery
 interfaces.5: interfaces.5.pre $(MAN)
 	sed $(foreach man,$(MAN),-e '/^##ADDRESSFAM##$$/r $(man)') \
 	     -e '/^##ADDRESSFAM##$$/d' < $< > $@	
 
-ifdown.8: ifup.8
+ifdown.8 ifquery.8: ifup.8
 	ln -sf $< $@
 
 %.5.ps: %.5

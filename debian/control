@@ -1,17 +1,21 @@
 Source: ifupdown
 Section: admin
 Priority: important
-Maintainer: Anthony Towns <ajt@debian.org>
+Maintainer: Andrew Shadura <andrewsh@debian.org>
 Uploaders: Petter Reinholdtsen <pere@debian.org>
-Standards-Version: 3.8.3
-Build-Depends: debhelper (>= 7), nowebm
+Standards-Version: 3.9.3
+Build-Depends: debhelper (>= 9.20120410~), noweb
+Vcs-Hg: http://anonscm.debian.org/hg/collab-maint/ifupdown/
+Vcs-Browser: http://anonscm.debian.org/hg/collab-maint/ifupdown/
 
 Package: ifupdown
 Architecture: any
-Depends: net-tools, ${shlibs:Depends}, ${misc:Depends}, lsb-base
-Suggests: iproute, dhcp3-client | dhcp-client, ppp
-Replaces: netbase (<< 4.00)
-Conflicts: dhcp-client (<< 3.0)
+Pre-Depends: ${misc:Pre-Depends}
+Depends: ${net:Depends}, ${shlibs:Depends}, ${misc:Depends}, lsb-base (>= 4.1+Debian3), initscripts (>= 2.88dsf-25)
+Suggests: isc-dhcp-client | dhcp-client, ppp, rdnssd, ${net:Suggests}
+Replaces: netbase (<< 5.0)
+Breaks: netbase (<< 5.0), dhcp-client (<< 3.0)
+Multi-Arch: foreign
 Description: high level tools to configure network interfaces
  This package provides the tools ifup and ifdown which may be used to
  configure (or, respectively, deconfigure) network interfaces based on
