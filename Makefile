@@ -21,14 +21,15 @@ all : executables docs
 executables : ifup ifdown ifquery ifup.8 ifdown.8 ifquery.8 interfaces.5
 docs : ifupdown.ps.gz ifup.8.ps.gz interfaces.5.ps.gz ifupdown.pdf
 
-.PHONY : executables 
-.PHONY : clean clobber
+.PHONY : executables
+.PHONY : clean distclean
 
 install :
 	install -m 0755 -d     ${BASEDIR}/sbin
 	install -m 0755 ifup   ${BASEDIR}/sbin
-	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifdown	
-	ln ${BASEDIR}/sbin/ifup ${BASEDIR}/sbin/ifquery
+	ln -s /sbin/ifup ${BASEDIR}/sbin/ifdown
+	ln -s /sbin/ifup ${BASEDIR}/sbin/ifquery
+	install -D -m 0755 settle-dad.sh $(BASEDIR)/lib/ifupdown/settle-dad.sh
 
 clean :
 	rm -f *.aux *.toc *.log *.bbl *.blg *.ps *.eps *.pdf
@@ -37,11 +38,8 @@ clean :
 	rm -f ifup ifdown ifquery interfaces.5 ifdown.8 ifquery.8
 	rm -f ifupdown.dvi *.ps{,.gz}
 
-clobber : clean
-	rm -f ifupdown.tex $(PERLFILES) $(CFILES) $(HFILES) $(DEFNFILES) arch*
+distclean : clean
 
-distclean : clobber
-	rm -f makecdep.sh makenwdep.sh Makefile
 ifup: $(OBJ)
 	$(CC) $(CFLAGS) $^ $(LDFLAGS) $(OUTPUT_OPTION)
 
@@ -106,5 +104,5 @@ ifeq "clobber" "$(MAKECMDGOALS)"
 include-deps := NO
 endif
 ifeq "$(strip $(include-deps))" "YES"
-include ifupdown.d
+-include ifupdown.d
 endif

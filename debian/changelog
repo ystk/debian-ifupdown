@@ -1,3 +1,160 @@
+ifupdown (0.7.48.1) unstable; urgency=low
+
+  * Add --ignore-errors option.
+  * Handle errors correctly during interface deconfiguration.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 23 Mar 2014 18:50:08 +0100
+
+ifupdown (0.7.48) unstable; urgency=low
+
+  * Ignore statuses on down, don't ignore them on up.
+      When configuring an interface, it's important for all commands
+      to succeed, so if anything fails, interface isn't marked as
+      configured. When deconfiguring it, however, we should do our
+      best we can to deconfigure it, so if something fails, that's
+      not the reason to stop trying.
+      Closes: #360806, #547587, #562962, #700811.
+  * Disable tests for DAD.
+  * Fix hurd static script with IPv6 support (Closes: #737084).
+  * Support preferred lifetime setting for tunnels (Closes: #735534).
+  * Provide an alternative iproute dependency to make backporting easier.
+  * Default to accept_ra=2 for inet6/auto (Closes: #739993, LP: #1260241)
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 23 Mar 2014 15:03:09 +0100
+
+ifupdown (0.7.47.2) unstable; urgency=low
+
+  * Rebuild to avoid useless dependencies on sysv-rc and file-rc.
+  * Don't pass deprecated arguments to update-rc.d.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Mon, 06 Jan 2014 21:23:03 +0100
+
+ifupdown (0.7.47.1) unstable; urgency=low
+
+  * Depend on adduser (Closes: #730598).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Wed, 27 Nov 2013 08:24:41 +0100
+
+ifupdown (0.7.47) unstable; urgency=low
+
+  * Don't use hardlinks for ifdown and ifquery.
+  * Remove Petter from the Uploaders.
+  * Ensure netdev group exists.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 26 Nov 2013 08:27:29 +0100
+
+ifupdown (0.7.46.1) unstable; urgency=low
+
+  * Disable DHCP test on Hurd to make the package buildable again.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Wed, 13 Nov 2013 14:15:47 +0100
+
+ifupdown (0.7.46) unstable; urgency=low
+
+  * Update copyrights.
+  * Change /run/network ownership to root:netdev.
+  * Drop now-empty Pre-Depends.
+  * Add --state command to ifquery.
+  * Update the init script to use --state.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Wed, 13 Nov 2013 13:46:58 +0100
+
+ifupdown (0.7.45) unstable; urgency=low
+
+  * Fix files enumeration in source-directory.
+  * Lock a lockfile, not the statefile (Closes: #704003).
+  * Bug fixes for Hurd (thanks to Justus Winter, closes: #720531)
+    - Accept interface names in form /dev/* on Hurd.
+    - Use inetutils-ifconfig, fix invocation of inetutils-ifconfig.
+    - Sanitize pidfile name.
+  * /lib/freebsd/route -> /sbin/route transition for kFreeBSD
+    (Closes: #721629).
+  * Set environment variables before running up and down commands.
+  * Add DAD script (most probably closes: #705996).
+  * Compat level 9.
+  * Bump Standards Version to 3.9.4 (no changes).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sat, 19 Oct 2013 20:25:51 +0200
+
+ifupdown (0.7.44) unstable; urgency=low
+
+  * Convert from noweb to plain C (Closes: #707209).
+  * Don't bring down VLANned aliases (Closes: #711449).
+  * Initialise 'verbose' variable (Closes: #710301).
+  * Handle relative paths properly (Closes: #712909).
+    Now non-absolute paths are understood relatively to the file
+    they're sourced from.
+  * Update RFC number (Closes: #717520).
+  * Add source-directory directive.
+  * Use source-directory in the default interfaces file.
+  * Remove loopback interface from the manpage example.
+  * Update the manpages (Closes: #711012).
+  * Depend on iproute2 instead of iproute (Closes: #713825).
+  * Recommend ISC DHCP client, at the same time declare Breaks against
+    dhcp3-client earlier than 4.0, as it has incompatible syntax.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Thu, 08 Aug 2013 21:55:27 +0200
+
+ifupdown (0.7.43) unstable; urgency=low
+
+  * Don't consider multiple auto declarations an error (Closes: #707052).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 07 May 2013 09:41:18 +0200
+
+ifupdown (0.7.42) unstable; urgency=low
+
+  * Fix syntax issue with postinst (Closes: #707041).
+  * Fix cross-build.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 07 May 2013 08:09:32 +0200
+
+ifupdown (0.7.41) unstable; urgency=low
+
+  * Upload to unstable.
+  * Don't release DHCPv6 leases in inet6/auto for a while (Closes: #703922).
+  * Remove "tryonce" option introduced in 0.7.40.
+  * Don't call dhclient with -1 for now.
+  * Remove ISC DHCP client from Build-Depends.
+  * Assign logical interface name for link pseudointerface on down
+    (Closes: #705268).
+  * Add implicit loopback device definition.
+  * Enable sourcing /etc/network/interfaces.d/* in the default configuration.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Thu, 11 Apr 2013 21:44:23 +0200
+
+ifupdown (0.7.40) experimental; urgency=low
+
+  [ Andrew Shadura ]
+  * Don't configure bridge interfaces as tagged VLAN interfaces
+    (Closes: #696642).
+  * Add "tryonce" option to DHCP-enabled methods (Closes: #694541).
+  * Implement inet6/auto for kFreeBSD, call DHCP release of ifdown
+    on Linux (Closes: #701884).
+  * Update manual pages.
+  * Add tests for DHCP method.
+  * Add ISC DHCP client to Build-Depends (the tests don't actually run
+    the DHCP client, however).
+
+  [ Stéphane Graber ]
+  * Patches for upstart support from Ubuntu:
+    - Start the job on runlevel [2345]. This is a no-op during a normal
+      boot since the network will be started *before* runlevel is emitted,
+      but is needed to restart the network after a change from runlevel 1
+      (LP: #752481).
+    - Don't bring 'lo' down (add it to --exclude).
+    - Emit deconfiguring-networking (LP: #1061639).
+    - Update network-interface-security job to stop when the parent job is
+      stopped itself. This avoids leftover instances (LP: #1065684).
+  * Set MTU of tunnel devices (LP: #1074048).
+  * Actually set the new calculated value for duplicate entries
+    (LP: #1086517).
+
+  [ Josselin Mouette ]
+  * postinst: Do not create /etc/network/interfaces if it was removed manually
+    (Closes: #695906)
+
+ -- Andrew Shadura <bugzilla@tut.by>  Mon, 04 Mar 2013 21:56:39 +0100
+
 ifupdown (0.7.8) unstable; urgency=medium
 
   * Assign logical interface name for link pseudointerface on down

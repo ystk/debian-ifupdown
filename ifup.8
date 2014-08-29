@@ -44,6 +44,10 @@ ifquery \- parse interface configuration
 [\fB\-i\fR \fIFILE\fR|\fB\-\-interfaces=\fR\fIFILE\fR]
 [\fB\-\-allow\fR \fICLASS\fR]
 \fB\-a\fR|\fIIFACE\fR...
+.PP
+.B ifquery
+\fB\-\-state\fR
+[\fIIFACE\fR...]
 .SH DESCRIPTION
 The
 .BR ifup " and " ifdown
@@ -70,6 +74,9 @@ will be brought down.
 .TP
 .B \-\-force
 Force configuration or deconfiguration of the interface.
+.TP
+.B \-\-ignore-errors
+If any of the commands of scripts fails, continue.
 .TP
 .BR \-h ", " \-\-help
 Show summary of options.
@@ -107,6 +114,14 @@ for more information about the mapping feature.
 .B \-\-no\-scripts
 Don't run any scripts under /etc/network/if-*.d/
 .TP
+.B \-\-no\-loopback
+Disable special handling of the loopback interface. By default, the loopback interface
+(\fIlo\fR on Linux) is predefined internally as an auto interface, so it's brought up
+on \fBifup -a\fR automatically. In the case the loopback device is redefined by user,
+the interface is configured just once anyway. If, however, another interface is also
+defined as loopback, it's configured as usual. Specifying this option disables this
+behaviour, so the loopback interface won't be configured automatically.
+.TP
 .BR \-V ", " \-\-version
 Show copyright and version information.
 .TP
@@ -116,6 +131,13 @@ Show commands as they are executed.
 .BR \-l ", " \-\-list
 For \fBifquery\fR, list all the interfaces which match the specified class.
 If no class specified, prints all the interfaces listed as \fBauto\fR.
+.TP
+.BR \-\-state
+For \fBifquery\fR, dump the state of the interfaces. When no interfaces specified,
+lists all interfaces brought up together with logical interfaces assigned to them and
+exits with a status code indicating success. If one or more interfaces specified,
+display state of these interfaces only; successful code is returned if all of interfaces
+given as arguments are up. Otherwise, 0 is returned.
 .SH EXAMPLES
 .TP
 .B ifup -a
@@ -166,6 +188,12 @@ checks if
 is still running. In that case,
 .B SIGTERM
 is sent to ifup.
+.P
+During interface deconfiguration,
+.BR ifdown
+ignores errors the same way as if
+.B \-\-ignore\-errors
+was specified.
 .SH FILES
 .TP
 .I /etc/network/interfaces
