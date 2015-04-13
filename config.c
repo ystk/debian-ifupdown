@@ -10,6 +10,9 @@
 #include <libgen.h>
 #include <wordexp.h>
 #include <dirent.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 static int get_line(char **result, size_t * result_len, FILE * f, int *line);
 static char *next_word(char *buf, char *word, int maxlen);
 static address_family *get_address_family(address_family * af[], char *name);
@@ -130,6 +133,16 @@ interfaces_file *read_interfaces(char *filename)
     defn->ifaces = NULL;
 
     if (!no_loopback) {
+        add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), LO_IFACE);
+    }
+
+    defn = read_interfaces_defn(defn, filename);
+
+    if (!defn) {
+        return NULL;
+    }
+
+    if (!no_loopback) {
         interface_defn *lo_if = malloc(sizeof(interface_defn));
         if (!lo_if) {
 
@@ -144,14 +157,12 @@ interfaces_file *read_interfaces(char *filename)
             .method = get_method(&addr_inet, "loopback"),
             .n_options = 0,
             .option = NULL,
-            .next = NULL
+            .next = defn->ifaces
         };
 
         defn->ifaces = lo_if;
-
-        add_allow_up(__FILE__, __LINE__, get_allowup(&defn->allowups, "auto"), lo_if->logical_iface);
     }
-    return read_interfaces_defn(defn, filename);
+    return defn;
 }
 
 static int directory_filter(const struct dirent * d)
@@ -183,8 +194,10 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
     char *rest;
 
     f = fopen(filename, "r");
-    if (f == NULL)
-        return NULL;
+    if (f == NULL) {
+        fprintf(stderr, "warning: couldn't open interfaces file \"%s\"\n", filename);
+        return defn;
+    }
     line = 0;
 
     while (get_line(&buf, &buf_len, f, &line)) {
@@ -270,10 +283,18 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
             wordexp_t p;
             char **w;
             size_t i;
+            struct stat sb;
+
             int fail = wordexp(pattern, &p, WRDE_NOCMD);
             if (!fail) {
                 w = p.we_wordv;
                 for (i = 0; i < p.we_wordc; i++) {
+                    if (stat(w[i], &sb) == -1) {
+                        /* wordexp can't expand * in an empty dir */
+                        if (errno == ENOENT) {
+                            continue;
+                        }
+                    }
                     if (verbose) {
                         fprintf(stderr, "Parsing file %s\n", w[i]);
                     }
@@ -402,6 +423,11 @@ interfaces_file *read_interfaces_defn(interfaces_file * defn, char *filename)
                 if (!currif->method) {
                     fprintf(stderr, "%s:%d: unknown method\n", filename, line);
                     return NULL;        /* FIXME */
+                }
+                if (((!strcmp(address_family_name, "inet")) ||
+                     (!strcmp(address_family_name, "inet6"))) &&
+                     (!strcmp(method_name, "loopback"))) {
+                     no_loopback = 1;
                 }
                 currif->automatic = 1;
                 currif->max_options = 0;

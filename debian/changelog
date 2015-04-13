@@ -1,3 +1,59 @@
+ifupdown (0.7.53.1) unstable; urgency=medium
+
+  * Update tests.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 13 Mar 2015 13:18:59 +0100
+
+ifupdown (0.7.53) unstable; urgency=medium
+
+  * Default accept_ra to 0 when gateway is set (Closes: #775660).
+  * Don't try to parse a non-existing file given by wordexp (Closes: #776578).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Fri, 13 Mar 2015 08:55:42 +0100
+
+ifupdown (0.7.52) unstable; urgency=medium
+
+  * Fix segfault when /e/n/i can't be read. Fail only when the file
+    has errors, issue a warning when it can't be opened (Closes: #774212).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 04 Jan 2015 15:21:25 +0100
+
+ifupdown (0.7.51) unstable; urgency=medium
+
+  [ Michael Biebl ]
+  * Check the hotplug interface operstate to avoid blocking the
+    boot process (Closes: #771943).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sun, 14 Dec 2014 12:34:19 +0100
+
+ifupdown (0.7.50) unstable; urgency=medium
+
+  [ Andrew Shadura ]
+  * Configure the loopback interface by default only if user hasn't
+    defined their own loopback interface (Closes: #709378).
+  * Update udhcp command-line options (Closes: #741579).
+  * Fix compiler warnings.
+  * Update the documentation regarding "source" keyword.
+
+  [ Michael Biebl ]
+  * Call "udev settle" explicitly before configuring any devices (Closes:
+    #766943).
+
+ -- Andrew Shadura <andrewsh@debian.org>  Sat, 29 Nov 2014 14:32:32 +0100
+
+ifupdown (0.7.49) unstable; urgency=medium
+
+  [ Andrew Shadura ]
+  * Proper implementation of auto on kFreeBSD (Closes: #738942).
+  * Don't fail on sysctl failing (Closes: #757937).
+  * Accept router advertisements when using DHCPv6 (Closes: #753580).
+  * Don't configure hotplug interfaces on networking start to avoid races.
+
+  [ Stéphane Graber ]
+  * Upstart job tweaks.
+
+ -- Andrew Shadura <andrewsh@debian.org>  Tue, 23 Sep 2014 17:39:51 +0200
+
 ifupdown (0.7.48.1) unstable; urgency=low
 
   * Add --ignore-errors option.
